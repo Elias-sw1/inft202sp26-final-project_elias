@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Browse Movies{% endblock %}
+
+{% block content %}
+<h1>Browse Movies</h1>
+<p>Search movie titles and scan the imported performance data.</p>
+
+<form class="search" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search by title">
+    <button type="submit">Search</button>
+</form>
+
+<div class="table-scroll">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Release</th>
+                <th>Runtime</th>
+                <th>Popularity</th>
+                <th>Vote Avg</th>
+                <th>Votes</th>
+                <th>Budget</th>
+                <th>Revenue</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.movie_id }}</td>
+                <td>{{ row.title }}</td>
+                <td>{{ row.release_date or "" }}</td>
+                <td>{{ row.runtime }}</td>
+                <td>{{ row.popularity }}</td>
+                <td>{{ row.vote_average }}</td>
+                <td>{{ row.vote_count }}</td>
+                <td>{{ "${:,}".format(row.budget) if row.budget else "" }}</td>
+                <td>{{ "${:,}".format(row.revenue) if row.revenue else "" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="pager">
+    <div>Page {{ page }} · {{ "{:,}".format(total) }} results</div>
+    <div>
+        {% if page > 1 %}
+            <a class="button secondary" href="{{ url_for('browse', q=q, page=page-1) }}">Previous</a>
+        {% endif %}
+        {% if has_next %}
+            <a class="button" href="{{ url_for('browse', q=q, page=page+1) }}">Next</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

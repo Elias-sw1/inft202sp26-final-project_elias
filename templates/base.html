@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Movie Performance Dashboard{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --navy: #0C2255;
+            --blue: #005DAA;
+            --orange: #F26822;
+            --ink: #182033;
+            --muted: #667085;
+            --line: #E5EAF2;
+            --bg: #F7F9FC;
+            --card: #FFFFFF;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: Inter, Arial, sans-serif;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--navy);
+            color: white;
+            border-bottom: 4px solid var(--orange);
+        }
+
+        .nav-inner {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 8px 10px;
+            border-radius: 6px;
+        }
+
+        .nav-links a:hover { background: rgba(255,255,255,0.14); }
+
+        main {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 28px 20px 48px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            color: var(--navy);
+            font-size: 32px;
+            line-height: 1.15;
+        }
+
+        h2 {
+            margin: 0 0 16px;
+            color: var(--navy);
+            font-size: 21px;
+        }
+
+        p { color: var(--muted); line-height: 1.6; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin: 24px 0;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 8px 22px rgba(12,34,85,0.06);
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            color: var(--blue);
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .section {
+            margin-top: 24px;
+        }
+
+        .chart-wrap {
+            height: 320px;
+        }
+
+        form.search {
+            display: flex;
+            gap: 10px;
+            margin: 22px 0;
+        }
+
+        input[type="search"] {
+            flex: 1;
+            min-width: 0;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 11px 12px;
+            font: inherit;
+        }
+
+        button, .button {
+            border: 0;
+            border-radius: 6px;
+            background: var(--blue);
+            color: white;
+            font: inherit;
+            font-weight: 800;
+            padding: 11px 14px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .button.secondary {
+            background: white;
+            color: var(--blue);
+            border: 1px solid var(--line);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 11px 12px;
+            border-bottom: 1px solid var(--line);
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        th {
+            color: var(--navy);
+            background: #EDF4FB;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        tr:last-child td { border-bottom: 0; }
+
+        .table-scroll {
+            overflow-x: auto;
+            border-radius: 8px;
+        }
+
+        .pager {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .callout {
+            border-left: 4px solid var(--orange);
+            background: #FFF6F0;
+            padding: 12px 14px;
+            border-radius: 6px;
+            color: var(--ink);
+        }
+
+        @media (max-width: 760px) {
+            h1 { font-size: 26px; }
+            .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            form.search { flex-direction: column; }
+        }
+
+        @media (max-width: 460px) {
+            .grid { grid-template-columns: 1fr; }
+            .stat-value { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-inner">
+            <div class="brand">Movie Performance</div>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}">Dashboard</a>
+                <a href="{{ url_for('browse') }}">Browse</a>
+                <a href="{{ url_for('insights') }}">Insights</a>
+            </div>
+        </div>
+    </nav>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

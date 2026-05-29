@@ -1,84 +1,136 @@
-# INFT202 - Database Final Project
+# Movie Performance Database Project
 
-This project uses Codex and Docker to guide you through a database final project in small steps: choosing data, exploring it, designing linked tables, writing SQL, and building a small Flask dashboard.
+## Dataset
 
-## Start Here
+This project uses `expensive_movie.csv`, a movie dataset with 8,121 rows. One row represents one movie and includes information such as title, release date, runtime, popularity, vote average, vote count, budget, and revenue.
 
-1. Fork this repo on GitHub.
-2. Clone your fork:
+The dataset was provided as a local CSV file for this project. During exploration, the main focus became movie performance: how runtime, voting, popularity, budget, and revenue relate to one another.
+
+## Data Exploration Summary
+
+The data exploration showed that `ID` uniquely identifies each movie, making it a strong primary key candidate. Several numeric columns contain many `0` values, especially `budget`, `revenue`, `runtime`, `vote_average`, and `vote_count`, so some `0` values may represent unknown data rather than true zero values.
+
+The dataset also includes future release dates and movies with different production statuses. For this project, the schema focuses on the selected performance columns instead of using every column from the original CSV.
+
+## Database Schema
+
+The data was split into two related tables.
+
+### `movie`
+
+One row represents one movie.
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `movie_id` | `INTEGER` | Primary key from the CSV `ID` column |
+| `title` | `TEXT` | Movie title |
+| `release_date` | `DATE` | Movie release date |
+| `runtime` | `INTEGER` | Runtime in minutes |
+
+### `movie_stats`
+
+One row represents the performance statistics for one movie.
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `movie_stats_id` | `INTEGER` | Primary key for the stats row |
+| `movie_id` | `INTEGER` | Foreign key connected to `movie.movie_id` |
+| `popularity` | `NUMERIC` | Popularity score |
+| `vote_average` | `NUMERIC` | Average vote score |
+| `vote_count` | `INTEGER` | Number of votes |
+| `budget` | `INTEGER` | Movie budget |
+| `revenue` | `BIGINT` | Movie revenue, using `BIGINT` because some revenue values are above the regular integer limit |
+
+## Guided SQL Queries
+
+1. `queries/query_1.sql` - Finds the 10 highest-revenue movies with a known budget.
+2. `queries/query_2.sql` - Counts how many movies appear for each runtime length.
+3. `queries/query_3.sql` - Calculates average revenue for each runtime length using known revenue values.
+4. `queries/query_4.sql` - Filters runtime groups to those with average revenue above 100 million dollars.
+5. `queries/query_5.sql` - Shows movie titles, release dates, runtimes, vote averages, and vote counts together.
+6. `queries/query_6.sql` - Finds runtime lengths with the highest average vote scores and counts movies in each runtime group.
+
+## Discussion Queries
+
+### High Ratings With Low Vote Counts
+
+This query finds movies with very high vote averages but very low vote counts.
+
+Student explanation: Yes, its on par with Cinemascore, and how Letterboxd users rate. When only a few people vote, it can limit the variety of opinions. This could be misleading because it could be due to influence culture.
+
+### Runtime and Popularity
+
+This query explores whether longer movies tend to have higher popularity scores.
+
+Student explanation: The longest movies also high popularity either its a superhero film or a indie epic. The pattern is diverse and mixed. That suggest that no more the runtime or popularity, a movie can be popularity or not, regetless of the runtime.
+
+## Web App
+
+The Flask web app includes:
+
+- A dashboard with summary stats and Chart.js charts
+- A browse page with search and pagination
+- An insights page showing the two discussion queries and explanations
+
+## Setup Instructions
+
+Start the database and Adminer:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/inft202-final-project.git
-cd inft202-final-project
+python3 scripts/setup_check.py
 ```
 
-3. Open Codex and choose this project folder as the workspace.
-4. In Codex, run the local agent skill by saying:
+Adminer is available at:
 
 ```text
-Load the db-final-project skill and start the final project guide.
+http://127.0.0.1:8080
 ```
 
-Codex will detect which phase you are in and tell you the next step.
+Adminer login:
 
-Codex's first job is to run `scripts/setup_check.py`. That script checks your GitHub setup, starts the Docker database bundle, and verifies a PostgreSQL database named `final`.
+| Field | Value |
+| --- | --- |
+| System | `PostgreSQL` |
+| Server | `postgres` |
+| Username | `postgres` |
+| Password | `postgres` |
+| Database | `final` |
 
-## What You Need Installed
+Beekeeper Studio connection:
 
-- Git
-- Docker Desktop
-- Codex
-- A GitHub account
+| Field | Value |
+| --- | --- |
+| Connection type | `Postgres` |
+| Host | `localhost` |
+| Port | `5432` |
+| User | `postgres` |
+| Password | `postgres` |
+| Default database | `final` |
 
-You do not need to install PostgreSQL, Python, pip, or Flask directly on your computer. Docker runs the database and app environment for this project.
-
-## What You Will Create
-
-- `data_exploration.md` - notes from exploring your dataset
-- `schema_plan.md` - your table design and table relationships
-- `table_creation.sql` - your own `CREATE TABLE` commands
-- `import.sql` - helper commands for loading data
-- `queries/query_1.sql` through `queries/query_6.sql` - guided SQL queries
-- `discussion/discussion_1.sql` and `discussion/discussion_2.sql` - your own analysis queries
-- A Flask dashboard generated after your SQL work is complete
-
-## Database Workflow
-
-The Docker setup starts:
-
-- PostgreSQL at `localhost:5432`
-- Adminer, a browser database tool, at `http://localhost:8080`
-
-To use **Adminer**, open `http://localhost:8080` and enter:
-
-- System/server: `PostgreSQL`
-- Server: `postgres`
-- Username: `postgres`
-- Password: `postgres`
-- Database: `final`
-
-To use **Beekeeper Studio**, create a new Postgres connection and enter:
-
-- Host: `localhost`
-- Port: `5432`
-- User: `postgres`
-- Password: `postgres`
-- Default database: `final`
-
-Write and run SQL in Adminer or Beekeeper Studio, then paste your query and a few result rows back into Codex. Codex will help you debug and will save your finished query files.
-
-Codex can guide you, but it should not write your final `CREATE TABLE` commands or graded query SQL for you.
-
-## Submit
-
-When finished, push your work to GitHub and submit the repo link on Canvas:
+Run the Flask dashboard:
 
 ```bash
-git add .
-git commit -m "Final project complete"
-git push
+docker compose --profile app up --build
 ```
 
-Your `.env` file should stay out of GitHub because it may contain your database password.
+The app runs at:
 
-See [RUBRIC.md](RUBRIC.md) for grading details.
+```text
+http://127.0.0.1:5001
+```
+
+Port `5001` is used because port `5000` was already in use on this machine.
+
+## Files
+
+- `data_exploration.md` - dataset observations and data quality notes
+- `schema_plan.md` - planned relational design
+- `table_creation.sql` - worksheet for table creation
+- `import.sql` - import helper using a staging table
+- `queries/` - six guided SQL challenge queries
+- `discussion/` - two student-selected analysis queries
+- `app.py` and `templates/` - Flask dashboard
+
+## GitHub Note
+
+The `.env` file is listed in `.gitignore` so database connection settings do not get committed to GitHub.

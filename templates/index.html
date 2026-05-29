@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Movie Performance Dashboard{% endblock %}
+
+{% block content %}
+<h1>Movie Performance Dashboard</h1>
+<p>Explore runtime, ratings, popularity, budget, and revenue from the imported movie dataset.</p>
+
+<div class="grid">
+    <div class="card">
+        <div class="stat-label">Total Movies</div>
+        <div class="stat-value">{{ "{:,}".format(stats.total_movies or 0) }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label">With Dates</div>
+        <div class="stat-value">{{ "{:,}".format(stats.dated_movies or 0) }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label">Avg Runtime</div>
+        <div class="stat-value">{{ stats.avg_runtime or 0 }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label">Known Revenue</div>
+        <div class="stat-value">{{ "{:,}".format(stats.movies_with_revenue or 0) }}</div>
+    </div>
+</div>
+
+<div class="card section">
+    <h2>Most Common Runtimes</h2>
+    <div class="chart-wrap">
+        <canvas id="runtimeChart"></canvas>
+    </div>
+</div>
+
+<div class="card section">
+    <h2>Top Average Revenue by Runtime</h2>
+    <div class="chart-wrap">
+        <canvas id="revenueChart"></canvas>
+    </div>
+</div>
+
+<script>
+    const runtimeLabels = {{ runtime_counts | map(attribute='runtime') | list | tojson }};
+    const runtimeCounts = {{ runtime_counts | map(attribute='movie_count') | list | tojson }};
+    const revenueLabels = {{ average_revenue | map(attribute='runtime') | list | tojson }};
+    const revenueValues = {{ average_revenue | map(attribute='avg_revenue') | list | tojson }};
+
+    new Chart(document.getElementById("runtimeChart"), {
+        type: "bar",
+        data: {
+            labels: runtimeLabels,
+            datasets: [{
+                label: "Movies",
+                data: runtimeCounts,
+                backgroundColor: "#005DAA"
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { title: { display: true, text: "Runtime in minutes" } },
+                y: { beginAtZero: true, title: { display: true, text: "Movie count" } }
+            }
+        }
+    });
+
+    new Chart(document.getElementById("revenueChart"), {
+        type: "bar",
+        data: {
+            labels: revenueLabels,
+            datasets: [{
+                label: "Average revenue",
+                data: revenueValues,
+                backgroundColor: "#F26822"
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { title: { display: true, text: "Runtime in minutes" } },
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: "Average revenue" },
+                    ticks: {
+                        callback: value => "$" + Number(value).toLocaleString()
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Movie Insights{% endblock %}
+
+{% block content %}
+<h1>Discussion Insights</h1>
+<p>These are the student-selected analysis questions and the results from the SQL queries.</p>
+
+{% for card in cards %}
+<section class="card section">
+    <h2>{{ card.question }}</h2>
+    <p class="callout">{{ card.explanation }}</p>
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    {% if card.rows %}
+                        {% for key in card.rows[0].keys() %}
+                            <th>{{ key.replace("_", " ") }}</th>
+                        {% endfor %}
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in card.rows %}
+                <tr>
+                    {% for value in row.values() %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endfor %}
+{% endblock %}

@@ -2,8 +2,3 @@
 venv/
 __pycache__/
 *.pyc
-*.pyo
-*.db
-.DS_Store
-setup_check.md
-database_setup.md
